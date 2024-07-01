@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jing静</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #222;
+      color: #ddd;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .container {
+      max-width: 300px;
+      margin: 20px auto 0;
+      display: flex;
+      flex-direction: column;
+      /* 改为列布局以实现上下排列 */
+      align-items: center;
+      /* 居中对齐 */
+    }
+
+    .ee {
+      background-color: #333;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      text-align: left;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      width: 100%;
+      /* 让每个.ee元素占据容器宽度 */
+      margin-bottom: 20px;
+      /* 在每个.ee元素间增加间距 */
+    }
+
+    .ee-title {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #b61372;
+    }
+
+
+    .ee-days,
+    .ee-next-date {
+      font-size: 16px;
+      color: #666;
+      margin-bottom: 10px;
+    }
+
+    .days-left {
+      color: #66ff99;
+    }
+
+    .days-passed {
+      color: #ff6699;
+    }
+
+    .days-comming {
+      color: #055b83;
+    }
+
+    @media (max-width: 600px) {
+      .ee {
+        padding: 10px;
+        /* 减少小屏设备上的内边距 */
+        font-size: 14px;
+        /* 字体大小适应小屏 */
+      }
+
+      .ee-title {
+        font-size: 18px;
+        /* 调整标题在小屏下的大小 */
+      }
+    }
+  </style>
+
+</head>
+
+<body>
+  <div class="container" id="anniversaries">
+    <!-- 动态插入模块列表 -->
+  </div>
+
+  <script>
+    function calculateDaysToNextSameDate(dateString) {
+      // 解析传入的日期字符串  
+      const inputDate = new Date(dateString);
+      if (isNaN(inputDate.getTime())) {
+        throw new Error('Invalid date string');
+      }
+      // 获取当前日期的月份和日期  
+      const currentMonth = inputDate.getMonth();
+      const currentDate = inputDate.getDate();
+      // 创建一个新的Date对象表示当前日期  
+      const now = new Date();
+      // 如果当前月份大于目标月份或月份相同但日期大于目标日期，则设置目标日期为明年的同一天  
+      if (now.getMonth() > currentMonth || (now.getMonth() === currentMonth && now.getDate() > currentDate)) {
+        inputDate.setFullYear(now.getFullYear() + 1);
+      } else {
+        // 否则，就是今天
+        inputDate.setFullYear(now.getFullYear());
+      }
+      // 确保日期在正确的月份，因为setMonth()方法可能会导致日期变化（如果设置的日期在当前月不存在）  
+      inputDate.setMonth(currentMonth, currentDate);
+      // 计算两个日期之间的毫秒差  
+      const diff = inputDate - now;
+      // 转换为天数  
+      const daysDiff = Math.ceil(diff / (1000 * 60 * 60 * 24));
+      return daysDiff;
+    }
+
+
+    const anniversaries = [
+      { date: "2017-10-27", title: "牵手" },
+      { date: "2017-11-13", title: "Kiss" },
+      { date: "2017-12-19", title: "甜蜜日" },
+      { date: "2018-01-01", title: "在一起" },
+      { date: "2021-06-13", title: "杭州同居" },
+      { date: "2021-06-15", title: "爱心午餐（油麦菜&番茄炒蛋）" },
+      { date: "2023-08-12", title: "开始异地" },
+    ];
+
+    const anniversariesContainer = document.getElementById("anniversaries");
+    anniversaries.forEach(ee => {
+      const eeElement = document.createElement("div");
+      eeElement.classList.add("ee");
+
+      const titleElement = document.createElement("div");
+      titleElement.classList.add("ee-title");
+      titleElement.textContent = ee.title;
+
+      const daysElement = document.createElement("div");
+      daysElement.classList.add("ee-days");
+
+      const nexteeDateElement = document.createElement("div");
+      daysElement.classList.add("ee-next-date");
+
+      const today = new Date();
+      const eeDate = new Date(ee.date);
+      const diffInDays = Math.ceil((eeDate - today) / (1000 * 60 * 60 * 24));
+
+      // 距离下一次的日期
+      const nextDateDays = calculateDaysToNextSameDate(eeDate);
+      if (nextDateDays == 0) {
+        nexteeDateElement.textContent = `今天就是 ${ee.title} 纪念日，一起庆祝吧！🎇`;
+        nexteeDateElement.classList.add("days-comming");
+      } else {
+        nexteeDateElement.textContent = `还有 ${nextDateDays} 天`;
+        nexteeDateElement.classList.add("days-comming");
+      }
+
+
+      if (diffInDays > 0) {
+        daysElement.textContent = `还有 ${diffInDays} 天`;
+        daysElement.classList.add("days-left");
+      } else {
+        daysElement.textContent = `已经过去 ${Math.abs(diffInDays)} 天`;
+        daysElement.classList.add("days-passed");
+      }
+
+      eeElement.appendChild(titleElement);
+      eeElement.appendChild(daysElement);
+      eeElement.appendChild(nexteeDateElement); // 添加新元素到DOM
+
+      anniversariesContainer.appendChild(eeElement);
+    });
+  </script>
+</body>
+
+</html>
